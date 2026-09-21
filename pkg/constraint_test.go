@@ -183,6 +183,11 @@ func TestConstraints_CheckWithBuildMetadata(t *testing.T) {
 		{"1.2.3+18446744073709551616", ">1.2.3+18446744073709551615", false, true},
 		{"1.2.3+99999999999999999999", ">1.2.3+100000000000000000000", false, true},
 
+		// Numeric identifiers within uint64 are compared exactly,
+		// unlike node-semver, which rounds them to JavaScript numbers
+		{"1.2.3+build.9007199254740993", ">1.2.3+build.9007199254740992", false, true},
+		{"1.2.3+build.9007199254740992", "=1.2.3+build.9007199254740993", false, false},
+
 		// Versions without build metadata are compared as usual
 		{"1.2.3", "=1.2.3", false, true},
 		{"1.2.3", ">=1.2.3", false, true},

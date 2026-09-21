@@ -15,25 +15,21 @@ func (o WithPreRelease) apply(c *conf) {
 	c.includePreRelease = bool(o)
 }
 
-// AllowBuildMetadata is an option that makes build metadata significant.
-// Semantic Versioning requires build metadata to be ignored and defines no
-// ordering for it, so by default "1.2.3+build.1" and "1.2.3+build.2" are equal.
-// This option is a deliberate extension that applies the pre-release precedence
-// rules to build metadata: identifiers are compared one by one, numeric ones are
-// compared numerically and rank below alphanumeric ones, and a longer set of
-// identifiers ranks higher:
-// "1.2.3" < "1.2.3+build" < "1.2.3+build.1" < "1.2.3+build.9" <
-// "1.2.3+build.10" < "1.2.3+build.alpha".
-// Other Semantic Versioning implementations, npm included, don't reproduce this
-// order.
-// Constraints with a wildcard (e.g. "2", "1.2.x" or "1.2.3-x") still ignore
-// build metadata.
+// AllowBuildMetadata makes build metadata significant when checking constraints.
+// Semantic Versioning requires it to be ignored and defines no ordering for it,
+// so by default "1.2.3+build.1" and "1.2.3+build.2" are equal. node-semver does
+// define an ordering in compareBuild, which backs its sort and rsort, and this
+// option applies that ordering to constraint checks:
+// https://github.com/npm/node-semver/blob/v7.8.5/README.md#comparison
 //
-// The option applies to every comparison, including constraints that carry no
-// metadata: with it enabled "1.2.3+build.1" no longer satisfies "=1.2.3" or
-// "<=1.2.3", and does satisfy ">1.2.3".
-// It affects constraint checking only: Version comparison (LessThan, Equal,
-// Compare) always follows Semantic Versioning.
+//	"1.2.3" < "1.2.3+build" < "1.2.3+build.1" < "1.2.3+build.9" <
+//	"1.2.3+build.10" < "1.2.3+build.alpha"
+//
+// It applies to constraints that carry no metadata as well, so "1.2.3+build.1"
+// no longer satisfies "=1.2.3" and does satisfy ">1.2.3". Constraints with a
+// wildcard (e.g. "2", "1.2.x" or "1.2.3-x") still ignore build metadata.
+// Version comparison (LessThan, Equal, Compare) is not affected and always
+// follows Semantic Versioning.
 type AllowBuildMetadata bool
 
 func (o AllowBuildMetadata) apply(c *conf) {

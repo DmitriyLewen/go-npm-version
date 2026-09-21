@@ -42,10 +42,10 @@ if c.Check(v) {
 
 #### Build Metadata
 
-Semantic Versioning requires build metadata to be ignored when determining version precedence and defines no ordering for it, so `1.2.3+build.1` and `1.2.3+build.2` satisfy the same constraints.
-`AllowBuildMetadata` is a deliberate extension that makes the metadata significant: versions that are otherwise equal are ordered by it, and a version without metadata is the lowest one.
-The pre-release precedence rules are applied to it, so identifiers are compared one by one, numeric identifiers are compared numerically and rank below alphanumeric ones, and a longer set of identifiers ranks higher.
-Other Semantic Versioning implementations, npm included, don't reproduce this order.
+Semantic Versioning requires build metadata to be ignored when determining version precedence and defines no ordering for it, so by default `1.2.3+build.1` and `1.2.3+build.2` satisfy the same constraints.
+npm behaves the same way — node-semver's `compare` and `satisfies` ignore build metadata — but it does define an ordering for it in [`compareBuild`](https://github.com/npm/node-semver/blob/v7.8.5/README.md#comparison), which backs its `sort` and `rsort`.
+`AllowBuildMetadata` applies that ordering to constraint checks as well: versions that are otherwise equal are ordered by their build metadata, and a version without metadata is the lowest one.
+Identifiers are compared one by one, numeric identifiers are compared numerically and rank below alphanumeric ones, and a longer set of identifiers ranks higher.
 
 ```
 v, _ := npm.NewVersion("1.2.3+build.1")
@@ -61,6 +61,8 @@ The option applies to every comparison, including constraints that carry no meta
 Constraints with a wildcard (e.g. `2`, `1.2.x` or `1.2.3-x`) keep ignoring build metadata.
 
 It affects constraint checking only: version comparison always follows Semantic Versioning and ignores build metadata.
+
+Numeric identifiers that don't fit in `uint64` are compared as strings, so their order may differ from the numeric one, e.g. `1.2.3+18446744073709551616` ranks above `1.2.3+100000000000000000000`.
 
 ### Version Sorting
 See [example](./examples/sort/main.go)

@@ -186,7 +186,8 @@ func andCheck(v Version, constraints []constraint, conf conf) bool {
 //
 // Semantic Versioning ignores build metadata when determining precedence, so
 // versions that differ only in metadata are equal. With AllowBuildMetadata such
-// versions are ordered by their metadata instead (see the option for details).
+// versions are ordered by their metadata instead, following node-semver's
+// compareBuild (see the option for details).
 func compare(v, c Version, conf conf) int {
 	result := v.Compare(c)
 	if result != 0 || !conf.allowBuildMetadata || isAny(v) || isAny(c) {
@@ -233,8 +234,10 @@ func lessThanOrEqual(v, c Version, conf conf) bool {
 }
 
 // compareMetadata orders two build metadata labels, treating a version without
-// metadata as the lowest one. Semantic Versioning defines no ordering for build
-// metadata, so the pre-release precedence rules are applied to it.
+// metadata as the lowest one, the way node-semver's compareBuild does.
+// Semantic Versioning defines no ordering for build metadata, so node-semver
+// reuses the pre-release precedence rules for it, and so does this function:
+// https://github.com/npm/node-semver/blob/v7.8.5/README.md#comparison
 func compareMetadata(v, c string) int {
 	switch {
 	case v == c:
@@ -248,12 +251,17 @@ func compareMetadata(v, c string) int {
 	return newMetadataParts(v).Compare(newMetadataParts(c))
 }
 
-// newMetadataParts splits a build metadata label into comparable identifiers.
-// Numeric identifiers are compared numerically and rank lower than alphanumeric
-// ones, and a larger set of identifiers has a higher precedence, e.g.
-// "build" < "build.1".
+// newMetadataParts splits a build metadata label into comparable identifiers,
+// ordered the way node-semver's compareBuild orders them: numeric identifiers
+// are compared numerically and rank lower than alphanumeric ones (its
+// compareIdentifiers helper), and a larger set of identifiers has a higher
+// precedence, e.g. "build" < "build.1".
 // part.NewPart is not used here: it maps "x" and "X" to a wildcard, while in
 // build metadata they are ordinary identifiers.
+//
+// A numeric identifier that doesn't fit in uint64 is kept as a string, so it is
+// compared lexically and ranks above every numeric one. Build numbers that large
+// aren't expected in practice.
 func newMetadataParts(s string) part.Parts {
 	identifiers := strings.Split(s, ".")
 	parts := make(part.Parts, len(identifiers))
