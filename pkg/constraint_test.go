@@ -62,7 +62,7 @@ func TestConstraints_Check(t *testing.T) {
 		{"4.0.0", "<1.2.3 || > 3.0.0,	< 4.0.0", false},
 		{"4.0.0", "<1.2.3 || > 3.0.0,<= 4.0.0", true},
 
-		// Build metadata is ignored without AllowBuildMetadata
+		// Build metadata is ignored without WithBuildMetadata
 		{"1.2.3+build.1", "<1.2.3+build.2", false},
 		{"1.2.3+build.2", "=1.2.3+build.1", true},
 		{"1.2.3", "<1.2.3+build.1", false},
@@ -257,7 +257,7 @@ func TestConstraints_CheckWithBuildMetadata(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		opts := []ConstraintOption{AllowBuildMetadata(true)}
+		opts := []ConstraintOption{WithBuildMetadata(true)}
 		name := fmt.Sprintf("%s vs %s", tc.constraint, tc.version)
 		if tc.preRelease {
 			opts = append(opts, WithPreRelease(true))

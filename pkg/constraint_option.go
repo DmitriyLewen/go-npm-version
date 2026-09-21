@@ -1,8 +1,8 @@
 package npm
 
 type conf struct {
-	includePreRelease  bool
-	allowBuildMetadata bool
+	includePreRelease    bool
+	includeBuildMetadata bool
 }
 
 type ConstraintOption interface {
@@ -15,7 +15,7 @@ func (o WithPreRelease) apply(c *conf) {
 	c.includePreRelease = bool(o)
 }
 
-// AllowBuildMetadata makes build metadata significant when checking constraints.
+// WithBuildMetadata makes build metadata significant when checking constraints.
 // Semantic Versioning requires it to be ignored and defines no ordering for it,
 // so by default "1.2.3+build.1" and "1.2.3+build.2" are equal. node-semver does
 // define an ordering in compareBuild, which backs its sort and rsort, and this
@@ -30,8 +30,8 @@ func (o WithPreRelease) apply(c *conf) {
 // wildcard (e.g. "2", "1.2.x" or "1.2.3-x") still ignore build metadata.
 // Version comparison (LessThan, Equal, Compare) is not affected and always
 // follows Semantic Versioning.
-type AllowBuildMetadata bool
+type WithBuildMetadata bool
 
-func (o AllowBuildMetadata) apply(c *conf) {
-	c.allowBuildMetadata = bool(o)
+func (o WithBuildMetadata) apply(c *conf) {
+	c.includeBuildMetadata = bool(o)
 }

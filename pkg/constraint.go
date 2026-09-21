@@ -185,12 +185,12 @@ func andCheck(v Version, constraints []constraint, conf conf) bool {
 // if the version is lower than, equal to or greater than the constraint version.
 //
 // Semantic Versioning ignores build metadata when determining precedence, so
-// versions that differ only in metadata are equal. With AllowBuildMetadata such
-// versions are ordered by their metadata instead, following node-semver's
-// compareBuild (see the option for details).
+// versions that differ only in metadata are equal. With the WithBuildMetadata
+// option such versions are ordered by their metadata instead, following
+// node-semver's compareBuild (see the option for details).
 func compare(v, c Version, conf conf) int {
 	result := v.Compare(c)
-	if result != 0 || !conf.allowBuildMetadata || isAny(v) || isAny(c) {
+	if result != 0 || !conf.includeBuildMetadata || isAny(v) || isAny(c) {
 		return result
 	}
 	return compareMetadata(v.Metadata(), c.Metadata())

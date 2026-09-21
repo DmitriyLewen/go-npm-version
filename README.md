@@ -44,12 +44,12 @@ if c.Check(v) {
 
 Semantic Versioning requires build metadata to be ignored when determining version precedence and defines no ordering for it, so by default `1.2.3+build.1` and `1.2.3+build.2` satisfy the same constraints.
 npm behaves the same way — node-semver's `compare` and `satisfies` ignore build metadata — but it does define an ordering for it in [`compareBuild`](https://github.com/npm/node-semver/blob/v7.8.5/README.md#comparison), which backs its `sort` and `rsort`.
-`AllowBuildMetadata` applies that ordering to constraint checks as well: versions that are otherwise equal are ordered by their build metadata, and a version without metadata is the lowest one.
+`WithBuildMetadata` applies that ordering to constraint checks as well: versions that are otherwise equal are ordered by their build metadata, and a version without metadata is the lowest one.
 Identifiers are compared one by one, numeric identifiers are compared numerically and rank below alphanumeric ones, and a longer set of identifiers ranks higher.
 
 ```
 v, _ := npm.NewVersion("1.2.3+build.1")
-c, _ := npm.NewConstraints("< 1.2.3+build.2", npm.AllowBuildMetadata(true))
+c, _ := npm.NewConstraints("< 1.2.3+build.2", npm.WithBuildMetadata(true))
 
 // 1.2.3 < 1.2.3+build < 1.2.3+build.1 < 1.2.3+build.9 < 1.2.3+build.10 < 1.2.3+build.alpha
 if c.Check(v) {
